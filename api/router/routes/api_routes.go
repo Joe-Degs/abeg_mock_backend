@@ -1,8 +1,12 @@
 package routes
 
-import "net/http"
+import (
+	"net/http"
 
-// server's routes defined as slice of Route struct.
+	"github.com/Joe-Degs/abeg_mock_backend/api/controllers"
+)
+
+// server's routes declared as slice of Route structs.
 var apiRoutes = []Route{
 	Route{
 		Uri:     "/api/login",

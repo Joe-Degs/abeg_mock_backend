@@ -5,10 +5,10 @@ import "net/http"
 
 // Login controls the login route of server
 func Login(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("login handler"))
+	w.Write([]byte("login handler\n"))
 }
 
 // Signup controls the signup route of server
 func Signup(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("signup handler"))
+	w.Write([]byte("signup handler\n"))
 }
