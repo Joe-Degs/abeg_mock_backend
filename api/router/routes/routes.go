@@ -23,6 +23,9 @@ func Load() []Route {
 func SetupRoutes(r *mux.Router) *mux.Router {
 	for _, route := range apiRoutes {
 		r.HandleFunc(route.Uri, route.Handler).Methods(route.Method)
+		// TODO
+		// define middlewares for logging and other things you might
+		// think about later.
 	}
 	return r
 }

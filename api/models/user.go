@@ -11,7 +11,7 @@ type User struct {
 	FullName    string `gorm:"unique;not null" json:"full_name"`
 	PhoneNumber string `gorm:"unique;not null" json:"phone_number"`
 	Email       string `gorm:"unique;not null" json:"email"`
-	Password    string `gorm:"not null" json:"-"`
+	Password    string `gorm:"not null" json:"password"`
 }
 
 // BeforeSave makes sure to securely hash password before saving in database.

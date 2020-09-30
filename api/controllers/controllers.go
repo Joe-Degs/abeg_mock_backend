@@ -8,10 +8,12 @@ import (
 	"net/http"
 
 	"github.com/Joe-Degs/abeg_mock_backend/api/database"
+	"github.com/Joe-Degs/abeg_mock_backend/api/helpers/debug"
 	"github.com/Joe-Degs/abeg_mock_backend/api/models"
 	"github.com/Joe-Degs/abeg_mock_backend/api/repository"
 	"github.com/Joe-Degs/abeg_mock_backend/api/repository/crud"
 	"github.com/Joe-Degs/abeg_mock_backend/api/responses"
+	"github.com/Joe-Degs/abeg_mock_backend/api/security"
 )
 
 // Login controls the login route of server
@@ -39,12 +41,23 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 	repo := crud.NewUsersCrud(db)
 	func(repo repository.UsersRepo) {
-		user, err := repo.FindUser(user.PhoneNumber)
+		dbUser, err := repo.FindUser(user.PhoneNumber)
 		if err != nil {
 			responses.ERROR(w, http.StatusUnprocessableEntity, err)
 			return
 		}
-		responses.JSON(w, http.StatusOK, user)
+		// check the values of dbUser and user
+		debug.Pretty(dbUser)
+		debug.Pretty(user)
+		// check password is same as hashed one.
+		err = security.Verify(dbUser.Password, user.Password)
+		if err != nil {
+			responses.ERROR(w, http.StatusUnauthorized, errors.New("incorrect password"))
+			return
+		}
+		responses.JSON(w, http.StatusOK, struct {
+			Message string `json:"message"`
+		}{Message: "login succesful"})
 	}(repo)
 }
 
@@ -93,7 +106,9 @@ func FindFriends(w http.ResponseWriter, r *http.Request) {
 // UpLoadImage will handle uploading and storing image data of registered users.
 // still dont know how to implement this yet, or the most efficient way to upload an image.
 // i'll read around on the internet on the best way to do it.
-//
+// Also dont know how to struct models to include image yet.
+// sending it via http POST with `content-type: multipart/form-data` seems like the smartest option
+// for my usecase.
 func UpLoadImage(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusNotImplemented, errors.New("come back at a longer later :-("))
 }
