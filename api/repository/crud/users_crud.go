@@ -42,7 +42,7 @@ func (u *users_crud) FindUser(phoneNumber string) (models.User, error) {
 
 	go func(done chan<- bool) {
 		defer close(done)
-		err := u.db.Debug().Model(&models.User{}).Where("phonenumber = ?", phoneNumber).Take(&user).Error
+		err := u.db.Debug().Model(&models.User{}).Where("phone_number = ?", phoneNumber).Take(&user).Error
 		if err != nil {
 			ch <- false
 			return

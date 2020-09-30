@@ -8,8 +8,8 @@ import (
 // User represents a single user who will own an account.
 type User struct {
 	gorm.Model
-	FullName    string `gorm:"unique;not null" json:"fullname"`
-	PhoneNumber string `gorm:"unique;not null" json:"phonenumber"`
+	FullName    string `gorm:"unique;not null" json:"full_name"`
+	PhoneNumber string `gorm:"unique;not null" json:"phone_number"`
 	Email       string `gorm:"unique;not null" json:"email"`
 	Password    string `gorm:"not null" json:"-"`
 }
