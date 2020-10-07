@@ -37,12 +37,12 @@ func (u *users_crud) SaveUser(user models.User) (models.User, error) {
 
 func (u *users_crud) FindUser(phoneNumber string) (models.User, error) {
 	var err error
+	var user models.User
 	ch := make(chan bool)
-	user := models.User{}
 
 	go func(done chan<- bool) {
 		defer close(done)
-		err := u.db.Debug().Model(&models.User{}).Where("phone_number = ?", phoneNumber).Take(&user).Error
+		err = u.db.Debug().Model(&models.User{}).Where("phone_number = ?", phoneNumber).Take(&user).Error
 		if err != nil {
 			ch <- false
 			return

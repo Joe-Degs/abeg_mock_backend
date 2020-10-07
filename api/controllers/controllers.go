@@ -142,9 +142,7 @@ func FindFriends(w http.ResponseWriter, r *http.Request) {
 				responses.ERROR(w, http.StatusUnprocessableEntity, err)
 				return
 			}
-			if user.ID != 0 {
-				registeredFriends = append(registeredFriends, user)
-			}
+			registeredFriends = append(registeredFriends, user)
 		}
 		responses.JSON(w, http.StatusOK, registeredFriends)
 	}(repo)
@@ -161,7 +159,7 @@ func UserIsRegistered(phoneNumber string, w http.ResponseWriter) (*models.User, 
 	repo := crud.NewUsersCrud(db)
 	user, err := repo.FindUser(phoneNumber)
 	if err != nil {
-		if user.ID == 0 {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			responses.ERROR(w, http.StatusUnauthorized, errors.New("unregistered user"))
 			return &user, false
 		}
@@ -190,8 +188,8 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		imgFormat := strings.Split(imgHeader.Header["Content-Type"][0], "/")[1]
-		filename := fmt.Sprintf("./test_images/%s.%s", phoneNumber, imgFormat)
-		file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0666)
+		filename := fmt.Sprintf("%s.%s", phoneNumber, imgFormat)
+		file, err := os.OpenFile("./test_images/"+filename, os.O_WRONLY|os.O_CREATE, 0666)
 		defer file.Close()
 		if err != nil {
 			responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -201,6 +199,9 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 			responses.ERROR(w, http.StatusUnprocessableEntity, err)
 			return
 		}
+		//TODO
+		// if copy successful, save filename to database
+
 		responses.JSON(w, http.StatusOK, struct {
 			Message string `json:"message"`
 		}{
