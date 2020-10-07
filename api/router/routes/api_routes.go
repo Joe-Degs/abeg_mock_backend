@@ -19,13 +19,18 @@ var apiRoutes = []Route{
 		Handler: controllers.Signup,
 	},
 	Route{
-		Uri:     "/api/findfriends",
+		Uri:     "/api/search",
 		Method:  http.MethodPost,
 		Handler: controllers.FindFriends,
 	},
 	Route{
-		Uri:     "/api/uploadimage",
+		Uri:     "/api/image",
 		Method:  http.MethodPost,
-		Handler: controllers.UpLoadImage,
+		Handler: controllers.UploadImage,
+	},
+	Route{
+		Uri:     "/api/image",
+		Method:  http.MethodPut,
+		Handler: controllers.UpdateImage,
 	},
 }

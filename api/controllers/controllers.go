@@ -4,8 +4,12 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/Joe-Degs/abeg_mock_backend/api/database"
 	"github.com/Joe-Degs/abeg_mock_backend/api/helpers/debug"
@@ -115,7 +119,6 @@ func FindFriends(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	registeredFriends := make([]models.User, 0)
 	debug.Pretty(friendsPhoneNumbers) // print to console
 
 	db, err := database.Connect()
@@ -129,6 +132,7 @@ func FindFriends(w http.ResponseWriter, r *http.Request) {
 	// but i'm confused as to which should come first the func or loop.
 	// should the function be in the loop or loop be in the function LOL!.
 	func(repo repository.UsersRepo) {
+		registeredFriends := make([]models.User, 0)
 		for _, number := range friendsPhoneNumbers.PhoneNumbers {
 			user, err := repo.FindUser(number)
 			if err != nil {
@@ -138,10 +142,33 @@ func FindFriends(w http.ResponseWriter, r *http.Request) {
 				responses.ERROR(w, http.StatusUnprocessableEntity, err)
 				return
 			}
-			registeredFriends = append(registeredFriends, user)
+			if user.ID != 0 {
+				registeredFriends = append(registeredFriends, user)
+			}
 		}
 		responses.JSON(w, http.StatusOK, registeredFriends)
 	}(repo)
+}
+
+// UserIsRegistered checks if users data can be found in database and returns
+// the user and a boolean value
+func UserIsRegistered(phoneNumber string, w http.ResponseWriter) (*models.User, bool) {
+	db, err := database.Connect()
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return &models.User{}, false
+	}
+	repo := crud.NewUsersCrud(db)
+	user, err := repo.FindUser(phoneNumber)
+	if err != nil {
+		if user.ID == 0 {
+			responses.ERROR(w, http.StatusUnauthorized, errors.New("unregistered user"))
+			return &user, false
+		}
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return &user, false
+	}
+	return &user, true
 }
 
 // UpLoadImage will handle uploading and storing image data of registered users.
@@ -150,6 +177,39 @@ func FindFriends(w http.ResponseWriter, r *http.Request) {
 // Also dont know how to struct models to include image yet.
 // sending it via http POST with `content-type: multipart/form-data` seems like the smartest option
 // for my usecase.
-func UpLoadImage(w http.ResponseWriter, r *http.Request) {
-	responses.JSON(w, http.StatusNotImplemented, errors.New("come back at a longer later :-("))
+func UploadImage(w http.ResponseWriter, r *http.Request) {
+	phoneNumber := r.FormValue("phone_number")
+
+	// before reading imgFile and anything else, check if user is registered?
+	if _, ok := UserIsRegistered(phoneNumber, w); ok {
+		r.ParseMultipartForm(10 << 10)
+		imgFile, imgHeader, err := r.FormFile("image")
+		defer imgFile.Close()
+		if err != nil {
+			responses.ERROR(w, http.StatusUnprocessableEntity, err)
+			return
+		}
+		imgFormat := strings.Split(imgHeader.Header["Content-Type"][0], "/")[1]
+		filename := fmt.Sprintf("./test_images/%s.%s", phoneNumber, imgFormat)
+		file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0666)
+		defer file.Close()
+		if err != nil {
+			responses.ERROR(w, http.StatusUnprocessableEntity, err)
+			return
+		}
+		if _, err = io.Copy(file, imgFile); err != nil {
+			responses.ERROR(w, http.StatusUnprocessableEntity, err)
+			return
+		}
+		responses.JSON(w, http.StatusOK, struct {
+			Message string `json:"message"`
+		}{
+			Message: "successful",
+		})
+	}
+
+}
+
+func UpdateImage(w http.ResponseWriter, r *http.Request) {
+	responses.ERROR(w, http.StatusNotImplemented, errors.New("working on it"))
 }
