@@ -8,22 +8,22 @@ import (
 // User represents a single user who will own an account.
 type User struct {
 	gorm.Model
-	FullName    string   `gorm:"unique;not null" json:"full_name"`
-	PhoneNumber string   `gorm:"uniqueIndex;not null" json:"phone_number"`
-	Email       string   `gorm:"unique;not null" json:"email"`
-	Password    string   `gorm:"not null" json:"password"`
-	UserData    UserData `gorm:"foreignkey:PhoneNumber"`
-	Account     Account  `gorm:"foreignkey:PhoneNumber"`
+	FullName    string `gorm:"unique;not null" json:"full_name"`
+	PhoneNumber string `gorm:"uniqueIndex;not null" json:"phone_number"`
+	Email       string `gorm:"unique;not null" json:"email"`
+	Password    string `gorm:"not null" json:"password"`
+	//UserData    UserData `gorm:"foreignkey:PhoneNumber"`
+	//Account     Account  `gorm:"foreignkey:PhoneNumber"`
+	//NextOfKin   NextOfKin
 }
 
 type UserData struct {
 	gorm.Model
-	PhoneNumber   string    `gorm:"uniqueIndex"`
-	Country       string    `gorm:"size:50"`
-	UserName      string    `gorm:"unique;size:50"`
-	Gender        string    `gorm:"size:17"` // prefer not to say is valid
-	ImageFileName string    `gorm:"unique;size:14;"`
-	NextOfKin     NextOfKin `gorm:"foreignKey:PhoneNumber"`
+	PhoneNumber   string `gorm:"uniqueIndex"`
+	Country       string `gorm:"size:50"`
+	UserName      string `gorm:"unique;size:50"`
+	Gender        string `gorm:"size:17"` // prefer not to say is valid
+	ImageFileName string `gorm:"unique;size:14;"`
 }
 
 type NextOfKin struct {
