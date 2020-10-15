@@ -54,7 +54,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	//	}(repo)
 
 	userform := NewForm(user.PhoneNumber)
-	if err, ok := userform.Get(); !ok {
+	if err := userform.Get(); err != nil {
 		if errors.Is(err, ErrUnregisteredUser) {
 			responses.ERROR(w, http.StatusUnauthorized, err)
 			return

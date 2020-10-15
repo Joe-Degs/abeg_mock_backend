@@ -9,7 +9,6 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/Joe-Degs/abeg_mock_backend/api/database"
 	"github.com/Joe-Degs/abeg_mock_backend/api/models"
@@ -62,30 +61,42 @@ func (u *UserForm) open() error {
 
 // Close sets repo on UserForm to nil.
 func (u *UserForm) Close() {
+	if u.repoConnection == nil {
+		return
+	}
 	u.repoConnection = nil
-	fmt.Printf("Repo is supposed to be nil, what did i get? %v", u.repoConnection)
 }
 
 // Get opens connection to database and retrieves user associated with Number field.
-func (u *UserForm) Get() (error, bool) {
+func (u *UserForm) get() error {
 	err := u.open()
 	if err != nil {
-		return err, false
+		return err
 	}
 	user, err := u.repoConnection.FindUser(u.Number)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ErrUnregisteredUser, false
+			return ErrUnregisteredUser
 		}
-		return err, false
+		return err
 	}
 	u.UserModel = &user
-	return nil, true
+	return nil
+}
+
+// get wraps get and exposes it to the outside world.
+func (u *UserForm) Get() error {
+	err := u.get()
+	if err != nil {
+		return err
+	}
+	defer u.Close()
+	return nil
 }
 
 // RegisterNewUser stores a new user in database.
 func (u *UserForm) RegisterNewUser(user models.User) error {
-	if _, ok := u.Get(); ok {
+	if err := u.get(); err != nil {
 		return ErrUserRegistered
 	}
 	defer u.Close()
