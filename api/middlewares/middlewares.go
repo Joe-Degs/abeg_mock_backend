@@ -1,6 +1,9 @@
 package middlewares
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+)
 
 // SetContentType is an unecessarily complex middlware function written
 // like this because i really dont want to declare multiple functions
@@ -18,6 +21,17 @@ func SetContentType(key, value string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set(key, value)
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func Logging(logger *log.Logger) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			defer func() {
+				logger.Println(r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent())
+			}()
 			next.ServeHTTP(w, r)
 		})
 	}

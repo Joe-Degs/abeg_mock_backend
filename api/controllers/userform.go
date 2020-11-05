@@ -108,7 +108,7 @@ func (u *UserForm) RegisterNewUser(user models.User) error {
 	return nil
 }
 
-// Validate compares a password and a hash and sees.
+// Validate compares a password and a hash.
 // this method is only called after calling Get.
 func (u *UserForm) Validate(password string) error {
 	err := security.Verify(u.UserModel.Password, password)
@@ -128,7 +128,6 @@ func fetch(repo repository.UsersRepo, number string) (*models.User, error) {
 }
 
 func GetUsers(numbers []string) ([]models.User, error) {
-	//return users, errors.New("")
 	repo, err := openConnection()
 	if err != nil {
 		return nil, err

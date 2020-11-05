@@ -28,31 +28,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// connect to db
-	//	db, err := database.Connect()
-	//	if err != nil {
-	//		responses.ERROR(w, http.StatusInternalServerError, err)
-	//		return
-	//	}
-	//	repo := crud.NewUsersCrud(db)
-	//	func(repo repository.UsersRepo) {
-	//		dbUser, err := repo.FindUser(user.PhoneNumber)
-	//		if err != nil {
-	//			responses.ERROR(w, http.StatusUnprocessableEntity, err)
-	//			return
-	//		}
-	//		// check the values of dbUser and user
-	//		debug.Pretty(dbUser)
-	//		debug.Pretty(user)
-	//		// check password is same as hashed one.
-	//		err = security.Verify(dbUser.Password, user.Password)
-	//		if err != nil {
-	//			responses.ERROR(w, http.StatusUnauthorized, errors.New("incorrect password"))
-	//			return
-	//		}
-	//		responses.JSON(w, http.StatusOK, dbUser)
-	//	}(repo)
-
 	userform := NewForm(user.PhoneNumber)
 	if err := userform.Get(); err != nil {
 		if errors.Is(err, ErrUnregisteredUser) {
@@ -70,5 +45,4 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	responses.JSON(w, http.StatusOK, *userform.UserModel)
-	return
 }

@@ -8,32 +8,24 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Joe-Degs/abeg_mock_backend/api/database"
-	"github.com/Joe-Degs/abeg_mock_backend/api/models"
-	"github.com/Joe-Degs/abeg_mock_backend/api/repository/crud"
 	"github.com/Joe-Degs/abeg_mock_backend/api/responses"
 	"gorm.io/gorm"
 )
 
 // UserIsRegistered checks if users data can be found in database and returns
 // the user and a boolean value
-func UserIsRegistered(phoneNumber string, w http.ResponseWriter) (*models.User, bool) {
-	db, err := database.Connect()
-	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, err)
-		return &models.User{}, false
-	}
-	repo := crud.NewUsersCrud(db)
-	user, err := repo.FindUser(phoneNumber)
+func UserIsRegistered(phoneNumber string, w http.ResponseWriter) (*UserForm, bool) {
+	form := NewForm(phoneNumber)
+	err := form.Get()
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			responses.ERROR(w, http.StatusUnauthorized, errors.New("unregistered user"))
-			return &user, false
+			responses.ERROR(w, http.StatusUnauthorized, ErrUnregisteredUser)
+			return nil, false
 		}
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
-		return &user, false
+		return nil, false
 	}
-	return &user, true
+	return form, true
 }
 
 // UpLoadImage will handle uploading and storing image data of registered users.
